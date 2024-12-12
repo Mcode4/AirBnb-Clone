@@ -3,7 +3,13 @@ const { restoreUser } = require('../../utils/auth.js');
 const { setTokenCookie } = require('../../utils/auth.js');
 const { User } = require('../../db/models');
 const { requireAuth } = require('../../utils/auth.js');
+
+const sessionRouter = require('./sessions.js');
+const usersRouter = require('./users.js');
+
 router.use(restoreUser);
+router.use('/session', sessionRouter);
+router.use('/users', usersRouter);
 
 router.get(
   '/restore-user',
