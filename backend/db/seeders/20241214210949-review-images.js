@@ -34,7 +34,7 @@ module.exports = {
     */
     for(let review of ReviewImage){
       const {reviewId, url} = review
-      const currReview = findByPk(reviewId)
+      const currReview = Review.findByPk(reviewId)
       console.log(`Current Review: ${currReview}`)
 
       await ReviewImage.create({
