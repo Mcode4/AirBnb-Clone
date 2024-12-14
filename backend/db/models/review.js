@@ -14,16 +14,16 @@ module.exports = (sequelize, DataTypes) => {
       Review.belongsTo(models.User, {
         foreignKey: 'userId'
       })
-      // Review.belongsTo(models.Spot, {
-      //   foreignKey: 'spotId'
-      // })
+      Review.belongsTo(models.Spot, {
+        foreignKey: 'spotId'
+      })
     }
   }
   Review.init({
-    // spotId: {
-    //   type: DataTypes.INTEGER,
-    //   allowNull: true,
-    // },
+    spotId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,

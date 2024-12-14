@@ -1,21 +1,26 @@
 'use strict';
-const { Review } = require('../models');
-const { User } = require('../models');
-const bcrypt = require("bcryptjs");
 
-const reviewData = [
-  {
-    spotId: null,
-    username: "Demo-lition",
-    review: "Great",
-    stars: 5
-  }
- ]
+const { SpotImage,Spot } = require('../models');
 
 let options = {};
 if (process.env.NODE_ENV === 'production') {
   options.schema = process.env.SCHEMA;  // define your schema in options object
 }
+
+const spotIm = [
+  {
+    // spotId:1,
+    name:'mars hotel',
+    url:'www.example.com',
+    preview:true
+  },
+  {
+    // spotId:1,
+    name:'mars hotel',
+    url:'www.example.com',
+    preview:false
+  }
+]
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -28,31 +33,33 @@ module.exports = {
      *   name: 'John Doe',
      *   isBetaMember: false
      * }], {});
-     * 
     */
-   for(let reviews of reviewData){
-    const {username, review, stars} = reviews
-    const foundUser = await User.findOne({
-      where:{
-        username
-      }
-    })
-    await Review.create({
-      'userId': foundUser.id,
-      review,
-      stars
-    })
-   }
+    //  await SpotImage.bulkCreate(spotIm,{
+    //   validate:true
+    //  });
+    for(let spot of spotIm){
+      const {name,url,preview} = spot;
+      const foundspot = await Spot.findOne({
+        where:{
+          name
+        }
+      });
+      console.log(foundspot.id);
+      await SpotImage.create({
+        "spotId":foundspot.id,url,preview
+      },options)
+    }
   },
 
   async down (queryInterface, Sequelize) {
+    options.tableName = 'SpotImages';
+    const Op = Sequelize.Op;
     /**
      * Add commands to revert seed here.
      *
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    options.tableName = 'Users';
     return queryInterface.bulkDelete(options,null,{});
   }
 };

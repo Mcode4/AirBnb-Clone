@@ -9,15 +9,15 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      // spotId: {
-      //   type: Sequelize.INTEGER,
-      //   allowNull: true,
-      //   references: {
-      //     model: "Spots",
-      //     key: 'id'
-      //   },
-      //   onDelete: "CASCADE"
-      // },
+      spotId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: "Spots",
+          key: 'id'
+        },
+        onDelete: "CASCADE"
+      },
       userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
