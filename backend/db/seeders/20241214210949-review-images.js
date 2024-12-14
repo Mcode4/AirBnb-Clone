@@ -7,16 +7,16 @@ if (process.env.NODE_ENV === 'production') {
 
 const reviewImages = [
   {
-    reviwewId: 1,
-    url: www.example.com
+    reviewId: 1,
+    url: 'www.example.com'
   },
   {
-    reviwewId: 2,
-    url: www.example.com
+    reviewId: 2,
+    url: 'www.example.com'
   },
   {
-    reviwewId: 3,
-    url: www.example.com
+    reviewId: 3,
+    url: 'www.example.com'
   }
 ]
 
@@ -35,7 +35,7 @@ module.exports = {
     for(let review of ReviewImage){
       const {reviewId, url} = review
       const currReview = Review.findByPk(reviewId)
-      console.log(`Current Review: ${currReview}`)
+      console.log(`Current Review: ${currReview}, Comment: ${currReview.review}`)
 
       await ReviewImage.create({
         reviewId: currReview.id,
