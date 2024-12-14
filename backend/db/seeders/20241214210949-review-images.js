@@ -32,7 +32,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-    for(let review of ReviewImage){
+    for(let review of reviewImages){
       const {reviewId, url} = review
       const currReview = Review.findByPk(reviewId)
       console.log(`Current Review: ${currReview}, Comment: ${currReview.review}`)
