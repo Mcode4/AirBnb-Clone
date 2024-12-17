@@ -11,6 +11,9 @@ router.use(restoreUser);
 router.use('/session', sessionRouter);
 router.use('/users', usersRouter);
 
+router.use('/review-images', require('./reviewimages.js'))
+router.use('/reviews', require('./reviews.js'))
+
 router.get(
   '/restore-user',
   (req, res) => {

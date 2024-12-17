@@ -35,6 +35,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Review',
+    // defaultScope: {
+    //   attributes: [this.id, this.userId, this.spotId, this.review, this.stars, this.createdAt, this.updatedAt]
+    // }
   });
   return Review;
 };
