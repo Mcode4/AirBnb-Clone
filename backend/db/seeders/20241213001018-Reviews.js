@@ -47,22 +47,22 @@ module.exports = {
      * }], {});
      * 
     */
-   for(let reviews of reviewData){
-    const {username, name,review, stars} = reviews
+   for(let data of reviewData){
+    const {username, name,review, stars} = data
     const foundUser = await User.findOne({
       where:{
         username
       }
     });
-    const foundspot = await Spot.findOne({
+    const foundSpot = await Spot.findOne({
       where:{
         name
       }
     });
     console.log(foundspot);
     await Review.create({
-      'userId': foundUser.id,
-      'spotId':foundspot.id,
+      userId: foundUser.id,
+      spotId: foundSpot.id,
       review,
       stars
     })
@@ -76,7 +76,7 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    options.tableName = 'Users';
+    options.tableName = 'Reviews';
     return queryInterface.bulkDelete(options,null,{});
   }
 };
