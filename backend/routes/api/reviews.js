@@ -15,19 +15,19 @@ function getCurrentUser(cookies){
 }
 
 //Get all Reviews of the Current User
-router.get('/current', async(req, res, next)=>{
-
-    const userId = await getCurrentUser(req.cookies).id;
+router.get('/current', requireAuth, async(req, res, next)=>{
+    const { user } = req;
+    const data = user.dataValues;
+    const userId = data.id;
     
     // Authentication
-    if(!userId){
+    if(!user){
         return res.status(400).json({
             message: "Must login. No current user"
         });
     };
 
     const reviews = await Review.findAll({
-        
         where:{
             userId
         },
@@ -42,57 +42,57 @@ router.get('/current', async(req, res, next)=>{
             model: ReviewImage
         }],
     });
+
     if(!reviews){
         return res.status(404).json({
             message: "Reviews couldn't be found"
         });
     };
-    if(`${review.userId}` !== `${userId}`){
-        return res.status(403).json({
-            message: "User not authorized"
-        });
-    };
-
     return res.status(200).json({Reviews: reviews});
 });
 
+
 //Add an Image to a Review based on the Review's id
-router.post('/:id/images', async(req, res, next)=>{
+router.post('/:id/images', requireAuth, async(req, res, next)=>{
     const reviewId = req.params.id;
     const { url } = req.body;
 
-    const review = await Review.findByPk(reviewId);
-    const userId = await getCurrentUser(req.cookies).id;
-
-    // Authentication
-    if(!userId){
-        return res.status(400).json({
-            message: "Must login. No current user"
-        });
-    };
+    const review = await Review.findByPk(reviewId)
+    const imageCount = await ReviewImage.findAndCountAll({where:{reviewId}});
+    const { user } = req;
+    const data = user.dataValues;
+    const userId = data.id;
 
     if(!review){
         return res.status(404).json({
             message: "Review couldn't be found"
         });
     };
-
+    // Authentication
+    if(!user){
+        return res.status(400).json({
+            message: "Must login. No current user"
+        });
+    };
     // Authorization
-    if(`${review.userId}` !== `${userId}`){
+   if(`${review.userId}` !== `${userId}`){
         return res.status(403).json({
             message: "User not authorized"
         });
     };
 
-    const count = await ReviewImage.findAll({where:{reviewId}}).count();
-    if(count === 10){
+    console.log('---->', imageCount.count);
+    
+    if(imageCount.count >= 10){
         return res.status(403).json({
             message: "Maximum number of images for this resource was reached"
         });
     };
 
     
-    if(!url.includes('www.') || !url.includes('.com')){
+
+    
+    if(!url){
         return res.status(400).json({
             message: "Invalid url"
         });
@@ -113,10 +113,13 @@ router.post('/:id/images', async(req, res, next)=>{
 
 
 //Edit a Review
-router.put('/:id', async(req, res, next)=>{
+router.put('/:id', requireAuth, async(req, res, next)=>{
     const { review, stars } = req.body;
     const currReview = await Review.findByPk(req.params.id);
-    const userId = await getCurrentUser(req.cookies).id;
+
+    const { user } = req;
+    const data = user.dataValues;
+    const userId = data.id;
     const errors = {};
 
     //Authentication
@@ -157,11 +160,14 @@ router.put('/:id', async(req, res, next)=>{
 
 
 //Delete a Review
-router.delete('/:id', async(req, res, next)=>{
+router.delete('/:id', requireAuth, async(req, res, next)=>{
     const review = await Review.findByPk(req.params.id);
-    const userId = await getCurrentUser(req.cookies).id;
+    const { user } = req;
+    const data = user.dataValues;
+    const userId = data.id;
+
     //Authentication
-    if(!userId){
+    if(!user){
         return res.status(400).json({
             message: "Must login. No current user"
         });
