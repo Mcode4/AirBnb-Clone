@@ -1,7 +1,10 @@
 'use strict';
-const { Review } = require('../models');
-const { User,Spot } = require('../models');
-const bcrypt = require("bcryptjs");
+
+const { User, Spot, Review } = require('../models');
+let options = {};
+if (process.env.NODE_ENV === 'production') {
+  options.schema = process.env.SCHEMA;  // define your schema in options object
+}
 
 const reviewData = [
   {
@@ -29,11 +32,6 @@ const reviewData = [
   }
  ]
 
-let options = {};
-if (process.env.NODE_ENV === 'production') {
-  options.schema = process.env.SCHEMA;  // define your schema in options object
-}
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
@@ -47,26 +45,19 @@ module.exports = {
      * }], {});
      * 
     */
-   for(let data of reviewData){
-    const {username, name,review, stars} = data
-    const foundUser = await User.findOne({
-      where:{
-        username
-      }
-    });
-    const foundSpot = await Spot.findOne({
-      where:{
-        name
-      }
-    });
-    console.log(foundspot);
-    await Review.create({
-      userId: foundUser.id,
-      spotId: foundSpot.id,
-      review,
-      stars
-    })
-   }
+    for(let data of reviewData){
+      const {username, name,review, stars} = data
+
+      const foundUser = await User.findOne({where:{ username }});
+      const foundSpot = await Spot.findOne({where:{ name }});
+      
+      await Review.create({
+        'userId': foundUser.id,
+        'spotId': foundSpot.id,
+        review,
+        stars
+      }, options);
+    }
   },
 
   async down (queryInterface, Sequelize) {
@@ -77,6 +68,7 @@ module.exports = {
      * await queryInterface.bulkDelete('People', null, {});
      */
     options.tableName = 'Reviews';
+    const Op = Sequelize.Op;
     return queryInterface.bulkDelete(options,null,{});
   }
 };
