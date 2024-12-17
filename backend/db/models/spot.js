@@ -21,18 +21,43 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER,
       allowNull:false
     },
-    address: DataTypes.STRING,
-    city: DataTypes.STRING,
-    state: DataTypes.STRING,
-    country: DataTypes.STRING,
-    lat: DataTypes.DECIMAL,
-    lng: DataTypes.DECIMAL,
+    address: {
+      type:DataTypes.STRING
+    },
+    city: {
+      type:DataTypes.STRING
+    },
+    state: {
+      type:DataTypes.STRING
+    },
+    country: {
+      type:DataTypes.STRING},
+    lat: {
+      type:DataTypes.DECIMAL,
+      validate:{
+        len:[-90,90]
+      }
+    },
+    lng: {
+      type:DataTypes.DECIMAL,
+      validate:{
+        len:[-180,180]
+      }
+    },
     name: {
-      type:DataTypes.STRING,
+      type:DataTypes.STRING(50),
       unique:true
     },
-    description: DataTypes.STRING,
-    price: DataTypes.DECIMAL
+    description: {
+      type:DataTypes.STRING},
+    price: {
+      type:DataTypes.DECIMAL,
+      validate:{
+        isPositive(value){
+             if(value<=0) throw new Error('price is larger than 0');
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'Spot',
