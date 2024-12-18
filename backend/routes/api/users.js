@@ -32,18 +32,56 @@ const validateSignup = [
     '/',
     validateSignup,
     async (req, res) => {
-      const { email, password, username } = req.body;
+      const { email, password, username, firstName, lastName } = req.body;
+      const errors = {};
+
+      if(await User.findOne({where:{username}})||await User.findOne({where:{email}})){
+        if(await User.findOne({where:{email}})){
+          errors.email = "User with that email already exists"
+        }
+        if(await User.findOne({where:{username}})){
+          errors.username = "User with that username already exists"
+        }
+        
+        res.status(500).json({
+          message: "User already exists",
+          errors
+        })
+      }
+
+      if(!email.includes('@')){
+        errors.email = "Invalid email"
+      }
+      if(!username){
+        errors.username = "Username is required"
+      }
+      if(!firstName){
+        errors.firstName = "First Name is required"
+      }
+      if(!lastName){
+        errors.lastName = "Last Name is required"
+      }
+      if(Object.keys(errors).length >0){
+        res.status(400).json({
+          message: "Bad Request",
+          errors
+        })
+      }
+
       const hashedPassword = bcrypt.hashSync(password);
-      const user = await User.create({ email, username, hashedPassword });
+      const user = await User.create({ email, username, hashedPassword, firstName, lastName });
   
       const safeUser = {
         id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         username: user.username,
       };
   
       await setTokenCookie(res, safeUser);
-  
+      
+      res.status(201)
       return res.json({
         user: safeUser
       });
