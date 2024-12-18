@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const { Review } = require('../../db/models');
 const { User } = require('../../db/models');
 const { Spot } = require('../../db/models');
-const { ReviewImage} = require('../../db/models');
+const { ReviewImage,SpotImage} = require('../../db/models');
 const { Model } = require("sequelize");
 
 function getCurrentUser(cookies){
@@ -29,18 +29,24 @@ router.get('/current', requireAuth, async(req, res, next)=>{
 
     const reviews = await Review.findAll({
         where:{
-            userId
+            userId:user.id
         },
-        
-        includes: [{
-            model: User
-        },
-        {
-            model: Spot
-        },
-        {
-            model: ReviewImage
-        }],
+        include:[
+            {
+                model:Spot,
+                include:[{
+                    model:SpotImage,
+                    as:'previewImage'
+                }]
+            },
+            {
+                model:ReviewImage
+            },
+            {
+                model:User
+            }
+        ]
+     
     });
 
     if(!reviews){
@@ -49,6 +55,7 @@ router.get('/current', requireAuth, async(req, res, next)=>{
         });
     };
     return res.status(200).json({Reviews: reviews});
+   
 });
 
 

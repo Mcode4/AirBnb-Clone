@@ -81,7 +81,7 @@ describe("\nGet all Reviews of the Current User", function () {
           expect(res.body).to.be.an("object");
           expect(res.body).to.have.property("Reviews").that.is.an("array");
 
-
+          console.log(res.body);
           if (res.body.Reviews.length > 0) {
             const review = res.body.Reviews[0];
             expect(review).to.include.keys(
