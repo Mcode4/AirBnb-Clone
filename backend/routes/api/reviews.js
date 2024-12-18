@@ -17,19 +17,15 @@ function getCurrentUser(cookies){
 //Get all Reviews of the Current User
 router.get('/current', requireAuth, async(req, res, next)=>{
     const { user } = req;
-    const data = user.dataValues;
-    const userId = data.id;
-    
-    // Authentication
     if(!user){
-        return res.status(400).json({
-            message: "Must login. No current user"
+        res.status(400).json({
+            message: "No User Logged"
         });
     };
 
     const reviews = await Review.findAll({
         where:{
-            userId:user.id
+            userId: user.id
         },
         include:[
             {
@@ -49,13 +45,13 @@ router.get('/current', requireAuth, async(req, res, next)=>{
      
     });
 
-    if(!reviews){
-        return res.status(404).json({
-            message: "Reviews couldn't be found"
-        });
+    if(reviews){
+        return res.status(200).json({Reviews: reviews});
     };
-    return res.status(200).json({Reviews: reviews});
-   
+    
+    return res.status(404).json({
+        message: "Reviews couldn't be found"
+    });
 });
 
 
@@ -63,49 +59,36 @@ router.get('/current', requireAuth, async(req, res, next)=>{
 router.post('/:id/images', requireAuth, async(req, res, next)=>{
     const reviewId = req.params.id;
     const { url } = req.body;
-
-    const review = await Review.findByPk(reviewId)
-    const imageCount = await ReviewImage.findAndCountAll({where:{reviewId}});
     const { user } = req;
-    const data = user.dataValues;
-    const userId = data.id;
 
+    const review = await Review.findByPk(reviewId);
+    const imageCount = await ReviewImage.findAndCountAll({where:{reviewId}});
+
+    // Authentication
     if(!review){
         return res.status(404).json({
             message: "Review couldn't be found"
         });
     };
-    // Authentication
-    if(!user){
-        return res.status(400).json({
-            message: "Must login. No current user"
-        });
-    };
     // Authorization
-   if(`${review.userId}` !== `${userId}`){
+   if(`${review.userId}` !== `${user.id}`){
         return res.status(403).json({
             message: "User not authorized"
         });
     };
 
-    console.log('---->', imageCount.count);
-    
+    // console.log('---->', imageCount.count);
     if(imageCount.count >= 10){
         return res.status(403).json({
             message: "Maximum number of images for this resource was reached"
         });
     };
 
-    
-
-    
     if(!url){
         return res.status(400).json({
             message: "Invalid url"
         });
     };
-
-    
 
     const image = await ReviewImage.create({
         reviewId,
@@ -125,25 +108,12 @@ router.put('/:id', requireAuth, async(req, res, next)=>{
     const currReview = await Review.findByPk(req.params.id);
 
     const { user } = req;
-    const data = user.dataValues;
-    const userId = data.id;
     const errors = {};
 
     //Authentication
-    if(!userId){
-        return res.status(400).json({
-            message: "Must login. No current user"
-        });
-    };
     if(!currReview){
         return res.status(404).json({
             message: "Review couldn't be found"
-        });
-    };
-    //Authorization
-    if(`${currReview.userId}` !== `${userId}`){
-        return res.status(403).json({
-            message: "User not authorized"
         });
     };
 
@@ -159,10 +129,16 @@ router.put('/:id', requireAuth, async(req, res, next)=>{
             errors
         });
     };
+    //Authorization
+    if(`${currReview.userId}` === `${user.id}`){
+        await currReview.update({review, stars});
+        return res.status(200).json(currReview);
+    };
 
-    await currReview.update({review, stars});
-
-    return res.status(200).json(currReview);
+    
+    return res.status(403).json({
+        message: "User not authorized"
+    });
 });
 
 
@@ -170,37 +146,25 @@ router.put('/:id', requireAuth, async(req, res, next)=>{
 router.delete('/:id', requireAuth, async(req, res, next)=>{
     const review = await Review.findByPk(req.params.id);
     const { user } = req;
-    const data = user.dataValues;
-    const userId = data.id;
 
     //Authentication
-    if(!user){
-        return res.status(400).json({
-            message: "Must login. No current user"
-        });
-    };
     if(!review){
         return res.status(404).json({
             message: "Review couldn't be found"
         });
     };
     // Authorization
-   if(`${review.userId}` !== `${userId}`){
-        return res.status(403).json({
-            message: "User not authorized"
+   if(`${review.userId}` === `${user.id}`){
+        await review.destroy()
+        return res.status(200).json({
+            message: "Successfully deleted"
         });
     };
-
-
-    await review.destroy()
-
-    return res.status(200).json({
-        message: "Successfully deleted"
+    
+    return res.status(403).json({
+        message: "User not authorized"
     });
 });
-
-
-
 
 
 module.exports = router

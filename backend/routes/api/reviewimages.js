@@ -12,23 +12,19 @@ router.delete('/:id', requireAuth, async(req, res, next)=>{
             message: "Review Image couldn't be found"
         });
     };
+
     const review = await Review.findByPk(reviewImg.reviewId);
     const { user } = req;
-    const data = user.dataValues;
-    const userId = data.id;
-   
     // Authorization
-   if(`${review.userId}` !== `${userId}`){
-        return res.status(403).json({
-            message: "User not authorized"
+   if(`${review.userId}` === `${user.id}`){
+        await reviewImg.destroy()
+        return res.status(200).json({
+            message: "Successfully deleted"
         });
     };
 
-
-    await reviewImg.destroy()
-
-    return res.status(200).json({
-        message: "Successfully deleted"
+    return res.status(403).json({
+        message: "User not authorized"
     });
 });
 
